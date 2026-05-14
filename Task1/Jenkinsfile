@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage("Cleanup") {
             steps {
-                sh "docker rm -f task1-container nginx-proxy 2>/dev/null || true"
+                sh "docker rm -f task1-container nginx-proxy test-container 2>/dev/null || true"
                 sh "docker network rm app-network 2>/dev/null || true"
             }
         }
@@ -24,18 +24,17 @@ pipeline {
                 }
             }
         }
-        stage("Unit Test") {
-            steps {
-                dir('Task1') {
-                    sh "pip install -r requirements.txt || pip3 install -r requirements.txt"
-                    sh "python -m unittest test_app -v || python3 -m unittest test_app -v"
-                }
-            }
-        }
         stage("Build") {
             steps {
                 dir('Task1') {
                     sh "docker build -t ppankh/flask-app ."
+                }
+            }
+        }
+        stage("Unit Test") {
+            steps {
+                dir('Task1') {
+                    sh "docker run --rm --name test-container ppankh/flask-app python -m unittest test_app -v"
                 }
             }
         }
