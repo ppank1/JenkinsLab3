@@ -1,0 +1,5 @@
+# Requirements only needed for the CI/CD pipeline (testing)
+# These are NOT included in the production Docker image
+Flask==2.1.0
+Werkzeug==2.0.3
+pytest==7.4.0

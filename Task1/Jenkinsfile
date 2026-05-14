@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage("Cleanup") {
             steps {
-                sh "docker rm -f task1-container nginx-proxy test-container 2>/dev/null || true"
+                sh "docker rm -f task1-container nginx-proxy 2>/dev/null || true"
                 sh "docker network rm app-network 2>/dev/null || true"
             }
         }
@@ -24,17 +24,29 @@ pipeline {
                 }
             }
         }
+        stage("Unit Test") {
+            steps {
+                dir('Task1') {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        sh '''
+                            python3 -m venv venv
+                            . venv/bin/activate
+                            pip install -r test-requirements.txt
+                            python -m pytest test_app.py -v --junitxml=test-results.xml
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'Task1/test-results.xml'
+                }
+            }
+        }
         stage("Build") {
             steps {
                 dir('Task1') {
                     sh "docker build -t ppankh/flask-app ."
-                }
-            }
-        }
-        stage("Unit Test") {
-            steps {
-                dir('Task1') {
-                    sh "docker run --rm --entrypoint python ppankh/flask-app -m unittest test_app -v"
                 }
             }
         }
@@ -51,6 +63,20 @@ pipeline {
                 sh "sleep 5"
                 sh "curl -f localhost"
             }
+        }
+    }
+    post {
+        always {
+            sh "rm -rf Task1/venv"
+        }
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        unstable {
+            echo "Pipeline completed with warnings - check test results."
+        }
+        failure {
+            echo "Pipeline failed - check logs for details."
         }
     }
 }
