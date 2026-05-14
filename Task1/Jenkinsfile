@@ -34,7 +34,7 @@ pipeline {
         stage("Unit Test") {
             steps {
                 dir('Task1') {
-                    sh "docker run --rm --name test-container ppankh/flask-app python -m unittest test_app -v"
+                    sh "docker run --rm --entrypoint python ppankh/flask-app -m unittest test_app -v"
                 }
             }
         }
