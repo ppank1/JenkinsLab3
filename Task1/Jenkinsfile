@@ -52,7 +52,7 @@ pipeline {
         }
         stage('Slim Image') {
             steps {
-                sh 'slim build --target flask-app:latest --tag flask-app:latest'
+                sh 'slim build --target ppankh/flask-app:latest --tag ppankh/flask-app:latest'
             }
         }
         stage("Deploy") {
