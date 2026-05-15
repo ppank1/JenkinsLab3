@@ -1,1 +1,4 @@
-s*.txt
+.git/
+__pycache__/
+*.pyc
+secretData.txt
