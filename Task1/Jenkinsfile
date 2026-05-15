@@ -1,7 +1,7 @@
 pipeline {
     agent any
-    stages {
-        stage("Cleanup") {
+    stages {        
+	stage("Cleanup") {
             steps {
                 sh "docker rm -f task1-container nginx-proxy 2>/dev/null || true"
                 sh "docker network rm app-network 2>/dev/null || true"
@@ -48,6 +48,11 @@ pipeline {
                 dir('Task1') {
                     sh "docker build -t ppankh/flask-app ."
                 }
+            }
+        }
+        stage('Slim Image') {
+            steps {
+                sh 'slim build --target flask-app:latest --tag flask-app:latest'
             }
         }
         stage("Deploy") {
